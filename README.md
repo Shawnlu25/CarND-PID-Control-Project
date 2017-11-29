@@ -1,98 +1,23 @@
-# CarND-Controls-PID
-Self-Driving Car Engineer Nanodegree Program
+# CarND-Controls-PID Project
 
----
+## Project Overview
+In this project, a Proportional-Integral-Derivative controller is developed to control the steering angle of a car in a simulated environment. The project also involves tuning parameters for the controller in order to keep the car on track.
 
-## Dependencies
+## Reflection
+### PID components
+As previously stated, PID stands for "Proportional", "Derivative" and "Integral". The explanation of each component are the following:
+* Proportional component means that the car will steer in proportion to the cross-track-error, that is, the distance between the position of the car and the central line of the track. Intuitively, we need to steer the car towards the central line more if the car is far away from the track. Notice that the value of Proportional coefficent would have a huge impact on the final behavior of our car: if the value is too high, the car would "overshoot" and "overcorrect" constantly, resulting in oscillation behavior; if the value is too low, the car would correct itself too slowly when encountering curves, which could result in "off-the-curb" situation.
+* Derivative component stands for the change in cross-track-error from one value to the next along the timeline. With derivative, the car would gradually decrease its steering angle as it moves towards the center of the lane. In other words, the car would correct itself in a more "smooth" fashion. Low value of this coefficent would lead to constant oscillations, and a high value would cause almost constant steering angle changes (often of large degrees).
+* The Integral component sums up all the CTE along the timeline to the current point, so that large accumulated CTE would cause the car to steer towards the middle gradually. This mechanism mainly deals with systematic error, where the CTE is not caused by failure of PI control described above, but by uncontrollable factors such as un-calibrated sensors. Overlarged value of this coefficient would cause a quicker oscillation, and oversmall value would cause the car to drift on side of the road for a longer period of time.
 
-* cmake >= 3.5
- * All OSes: [click here for installation instructions](https://cmake.org/install/)
-* make >= 4.1(mac, linux), 3.81(Windows)
-  * Linux: make is installed by default on most Linux distros
-  * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
-  * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
-* gcc/g++ >= 5.4
-  * Linux: gcc / g++ is installed by default on most Linux distros
-  * Mac: same deal as make - [install Xcode command line tools]((https://developer.apple.com/xcode/features/)
-  * Windows: recommend using [MinGW](http://www.mingw.org/)
-* [uWebSockets](https://github.com/uWebSockets/uWebSockets)
-  * Run either `./install-mac.sh` or `./install-ubuntu.sh`.
-  * If you install from source, checkout to commit `e94b6e1`, i.e.
-    ```
-    git clone https://github.com/uWebSockets/uWebSockets 
-    cd uWebSockets
-    git checkout e94b6e1
-    ```
-    Some function signatures have changed in v0.14.x. See [this PR](https://github.com/udacity/CarND-MPC-Project/pull/3) for more details.
-* Simulator. You can download these from the [project intro page](https://github.com/udacity/self-driving-car-sim/releases) in the classroom.
+According to experiments, my observations of the simulated car under different PID settings matches my expectations.
 
-There's an experimental patch for windows in this [PR](https://github.com/udacity/CarND-PID-Control-Project/pull/3)
+### Parameter search
+I used a combination of Twiddle and manual tuning to search for a good PID coefficent settings (The Twiddle part is removed from the final code). First, I ran Twiddle with the same setting described in the Udacity lecture; then I performed a manual search around the result from Twiddle. For each parameter setting, I took the average of CTE for 10 runs as the metric. The final setting I have is P=0.21, I=0.0042, D=2.9. This setting works well, and would enable the car to race at around 50mph safely. 
 
 ## Basic Build Instructions
 
 1. Clone this repo.
-2. Make a build directory: `mkdir build && cd build`
-3. Compile: `cmake .. && make`
-4. Run it: `./pid`. 
-
-Tips for setting up your environment can be found [here](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/f758c44c-5e40-4e01-93b5-1a82aa4e044f/concepts/23d376c7-0195-4276-bdf0-e02f1f3c665d)
-
-## Editor Settings
-
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
-
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
-
-## Code Style
-
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
-
-## Project Instructions and Rubric
-
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
-
-More information is only accessible by people who are already enrolled in Term 2
-of CarND. If you are enrolled, see [the project page](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/f1820894-8322-4bb3-81aa-b26b3c6dcbaf/lessons/e8235395-22dd-4b87-88e0-d108c5e5bbf4/concepts/6a4d8d42-6a04-4aa6-b284-1697c0fd6562)
-for instructions and the project rubric.
-
-## Hints!
-
-* You don't have to follow this directory structure, but if you do, your work
-  will span all of the .cpp files here. Keep an eye out for TODOs.
-
-## Call for IDE Profiles Pull Requests
-
-Help your fellow students!
-
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to we ensure
-that students don't feel pressured to use one IDE or another.
-
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
-
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
-
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
-
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
-
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./
-
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
-
+2. Under the repository folder, run `mkdir build && cd build` followed by `cmake .. && make`
+3. Open up the udacity CarND term-2 simulator
+4. Run PID controller `./pid`. 
